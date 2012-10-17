@@ -6,8 +6,15 @@
  */
 #import "TiModule.h"
 
-@interface ComFoodonthetableRegionsModule : TiModule 
+#import <CoreLocation/CoreLocation.h>
+
+@interface ComFoodonthetableRegionsModule : TiModule<CLLocationManagerDelegate>
 {
 }
 
+@property (nonatomic, retain) CLLocationManager *locationManager;
+
+//- (void) startMonitoring:(id)region;
+//- (void) stopMonitoring:(id)region;
+//- (void) stopMonitoringAllRegions:(id)args;
 @end
