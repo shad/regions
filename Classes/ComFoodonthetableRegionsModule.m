@@ -14,7 +14,7 @@
 @synthesize locationManager, lastEvent, options;
 
 
-#pragma mark Internal
+#pragma mark - Titanium Module
 
 // this is generated for your module, please do not change it
 -(id)moduleGUID
@@ -49,7 +49,7 @@
 	[super shutdown:sender];
 }
 
-#pragma mark Cleanup 
+#pragma mark Cleanup
 
 -(void)dealloc
 {
@@ -88,6 +88,8 @@
 		// since no body is listening at this point for that event
 	}
 }
+
+#pragma mark - Regions Implementation
 
 -(CLLocationManager*)getLocationManager
 {
