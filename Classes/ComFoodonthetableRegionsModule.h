@@ -13,6 +13,8 @@
 }
 
 @property (nonatomic, retain) CLLocationManager *locationManager;
+@property (nonatomic, retain) NSString *lastEvent;
+@property (nonatomic, retain) NSDictionary *options;
 
 //- (void) startMonitoring:(id)region;
 //- (void) stopMonitoring:(id)region;

@@ -11,7 +11,7 @@
 
 @implementation ComFoodonthetableRegionsModule
 
-@synthesize locationManager;
+@synthesize locationManager, lastEvent, options;
 
 
 #pragma mark Internal
@@ -35,10 +35,7 @@
 	// this method is called when the module is first loaded
 	// you *must* call the superclass
 	[super startup];
-	
-    
-	
-	NSLog(@"[REGIONS] %@ loaded",self);
+//	NSLog(@"[REGIONS] %@ loaded",self);
 }
 
 -(void)shutdown:(id)sender
@@ -73,7 +70,7 @@
 
 -(void)_listenerAdded:(NSString *)type count:(int)count
 {
-	NSLog(@"[REGIONS] listenerAdded %@", type);
+//	NSLog(@"[REGIONS] listenerAdded %@", type);
 	if (count == 1 && [type isEqualToString:@"my_event"])
 	{
 		// the first (of potentially many) listener is being added 
@@ -83,7 +80,7 @@
 
 -(void)_listenerRemoved:(NSString *)type count:(int)count
 {
-	NSLog(@"[REGIONS] listenerRemoved %@", type);
+//	NSLog(@"[REGIONS] listenerRemoved %@", type);
 	if (count == 0 && [type isEqualToString:@"my_event"])
 	{
 		// the last listener called for event named 'my_event' has
@@ -96,14 +93,10 @@
 {
     if (NULL == locationManager) {
         // Location Management stuff
-        NSLog(@"[REGIONS] Initialize locationManager");
         locationManager = [[CLLocationManager alloc] init];
         locationManager.delegate = self;
         locationManager.distanceFilter = kCLLocationAccuracyHundredMeters;
         locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-        
-        // Start updating location changes.
-        [locationManager startUpdatingLocation];
         [self fireEvent:@"didInitialize"];
     }
     return locationManager;
@@ -111,13 +104,19 @@
 
 
 #pragma Public APIs
+-(void)initialize:(id)newOptions
+{
+    ENSURE_SINGLE_ARG(newOptions, NSDictionary);
+    [self setOptions:newOptions];
+}
+
 -(void)startMonitoring:(id)region
 {
     ENSURE_UI_THREAD_1_ARG(region);
     ENSURE_SINGLE_ARG(region,NSDictionary);
     
     if ([CLLocationManager regionMonitoringAvailable]) {
-        NSLog(@"[REGIONS] startMonitoring");
+//        NSLog(@"[REGIONS] startMonitoring");
         
         
         double lat = [(NSNumber*)[region objectForKey:@"lat"] doubleValue];
@@ -164,12 +163,12 @@
     }
 }
 
--(void)stopMonitoringAllRegions
+-(void)stopMonitoringAllRegions:(id)args
 {
     ENSURE_UI_THREAD_0_ARGS;
     // Get all regions being monitored for this application.
     if ([CLLocationManager regionMonitoringAvailable]) {
-        NSLog(@"[REGIONS] stopMonitoringAllRegions");
+//        NSLog(@"[REGIONS] stopMonitoringAllRegions");
         NSArray *regions = [[locationManager monitoredRegions] allObjects];
 	
         // Iterate through the regions and add annotations to the map for each of them.
@@ -197,8 +196,6 @@
     {
         if (locationManager)
         {
-            NSLog(@"[REGIONS] monitoredRegions");
-        
             // Get all regions being monitored for this application.
             NSArray *regions = [[locationManager monitoredRegions] allObjects];
             NSMutableArray* jsRegions = [NSMutableArray arrayWithCapacity:[regions count]];
@@ -225,32 +222,6 @@
     }
 }
 
--(void)monitorChangesSignificantOnly
-{
-    ENSURE_UI_THREAD_0_ARGS;
-    if ([CLLocationManager significantLocationChangeMonitoringAvailable]) {
-		// Stop normal location updates and start significant location change updates for battery efficiency.
-		[[self getLocationManager] stopUpdatingLocation];
-		[[self getLocationManager] startMonitoringSignificantLocationChanges];
-	}
-	else {
-		NSLog(@"Significant location change monitoring is not available.");
-	}
-
-}
--(void)monitorChangesNormal
-{
-    ENSURE_UI_THREAD_0_ARGS;
-    if ([CLLocationManager significantLocationChangeMonitoringAvailable]) {
-        // Stop significant location updates and start normal location updates again since the app is in the forefront.
-        [[self getLocationManager] stopMonitoringSignificantLocationChanges];
-        [[self getLocationManager] startUpdatingLocation];
-    }
-    else {
-        NSLog(@"Significant location change monitoring is not available.");
-    }
-}
-
 
 #pragma mark - CLLocationManagerDelegate
 
@@ -264,50 +235,59 @@
 }
 
 
+// This shouldn't be called since we're not using location stuff
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
-    // do nothing here for now.
-	NSLog(@"[REGIONS] updatedLocation");
 }
 
 
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region  {
 	NSString *msg = [NSString stringWithFormat:@"Enter %@ at %@", region.identifier, [NSDate date]];
-    NSDictionary *region_info = [NSDictionary dictionaryWithObjectsAndKeys:
-                                 [NSNumber numberWithDouble:region.center.latitude],@"lat",
-                                 [NSNumber numberWithDouble:region.center.longitude],@"lng",
-                                 [NSNumber numberWithDouble:region.radius],@"radius",
-                                 region.identifier,@"id",
-                                 nil];
-    
-    NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-                           msg,@"message",
-                           region_info,@"region",
-                           nil];
-	NSLog(@"[REGIONS] didEnterRegion %@", msg);
-    [self fireEvent:@"didEnterRegion" withObject:event];
+    if (![msg isEqualToString:self.lastEvent])
+    {
+
+        [self setLastEvent:[NSString stringWithString:msg]];
+        NSDictionary *region_info = [NSDictionary dictionaryWithObjectsAndKeys:
+                                     [NSNumber numberWithDouble:region.center.latitude],@"lat",
+                                     [NSNumber numberWithDouble:region.center.longitude],@"lng",
+                                     [NSNumber numberWithDouble:region.radius],@"radius",
+                                     region.identifier,@"id",
+                                     nil];
+        
+        NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
+                               msg,@"message",
+                               region_info,@"region",
+                               nil];
+//        NSLog(@"[REGIONS] didEnterRegion %@", msg);
+        [self fireEvent:@"didEnterRegion" withObject:event];
+    }
 }
 
 
 - (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region {
 	NSString *msg = [NSString stringWithFormat:@"Exit %@ at %@", region.identifier, [NSDate date]];
-    NSDictionary *region_info = [NSDictionary dictionaryWithObjectsAndKeys:
+    if (![msg isEqualToString:self.lastEvent])
+    {
+        [self setLastEvent:[NSString stringWithString:msg]];
+        NSDictionary *region_info = [NSDictionary dictionaryWithObjectsAndKeys:
                                  [NSNumber numberWithDouble:region.center.latitude],@"lat",
                                  [NSNumber numberWithDouble:region.center.longitude],@"lng",
                                  [NSNumber numberWithDouble:region.radius],@"radius",
                                  region.identifier,@"id",
                                  nil];
     
-    NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
-                           msg,@"message",
-                           region_info,@"region",
-                           nil];
-	NSLog(@"[REGIONS] didExitRegion %@", msg);
-    [self fireEvent:@"didExitRegion" withObject:event];
+        NSDictionary *event = [NSDictionary dictionaryWithObjectsAndKeys:
+                               msg,@"message",
+                               region_info,@"region",
+                               nil];
+//        NSLog(@"[REGIONS] didExitRegion %@", msg);
+        [self fireEvent:@"didExitRegion" withObject:event];
+    }
 }
 
 
 - (void)locationManager:(CLLocationManager *)manager monitoringDidFailForRegion:(CLRegion *)region withError:(NSError *)error {
 	NSString *formattedError = [NSString stringWithFormat:@"%@", error];
+    [self setLastEvent:@""];
     NSDictionary *region_info = [NSDictionary dictionaryWithObjectsAndKeys:
                                  [NSNumber numberWithDouble:region.center.latitude],@"lat",
                                  [NSNumber numberWithDouble:region.center.longitude],@"lng",
