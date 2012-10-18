@@ -14,13 +14,24 @@ Regions are circular, and are defined as a latitude, longitude and radius size.
 Additionally, you provide an id that's unique for your app.  These attributes
 will also be passed to each relevant event listener.
 
-If you have problems or improvements, please contact me.
+### What this is NOT
 
-Shad
+This will not help you if you want to do location monitoring or significant
+change monitoring.  I could add that if someone needs it, but I don't right
+now, so this module is region monitoring only.
+
+
+### Contributing
+
+If you have improvements I'm happy to merge pull requests (if they include some
+sort of test plan).
 
 
 Testing
 -------
+There aren't any real automated tests here since you sort of need to simulate
+moving around to get events firing.  You can do this in the iPhone Simulator
+'Debug' menu item.
 
 Check out  `example/app.js` for a complete example of how to integrate this
 into your project.
