@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Regions : Titanium module that just wraps CLLocationManager (specifically, region monitoring)" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Regions</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/shad/regions">View on GitHub</a>
+
+          <h1 id="project_title">Regions</h1>
+          <h2 id="project_tagline">Titanium module that just wraps CLLocationManager (specifically, region monitoring)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/shad/regions/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/shad/regions/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>'Regions' Intro</h1>
+
+<p>This is a thin wrapper around the CLCoreLocation region monitoring in iOS.
+When you start monitoring a region, iOS will continue monitoring that region
+even when you app is <em>not running</em>.  If it detects someone moving into a region
+that you have defined, then your app will be started and the appropriate events
+will be triggered.</p>
+
+<p>These are the same API's that drive the 'reminders' app (i.e. "Remind me to pay
+my bills when I get home")</p>
+
+<p>Regions are circular, and are defined as a latitude, longitude and radius size.
+Additionally, you provide an id that's unique for your app.  These attributes
+will also be passed to each relevant event listener.</p>
+
+<h3>What this is NOT</h3>
+
+<p>This will not help you if you want to do location monitoring or significant
+change monitoring.  I could add that if someone needs it, but I don't right
+now, so this module is region monitoring only.</p>
+
+<h3>Contributing</h3>
+
+<p>If you have improvements I'm happy to merge pull requests (if they include some
+sort of test plan).</p>
+
+<h2>Testing</h2>
+
+<p>There aren't any real automated tests here since you sort of need to simulate
+moving around to get events firing.  You can do this in the iPhone Simulator
+'Debug' menu item.</p>
+
+<p>Check out  <code>example/app.js</code> for a complete example of how to integrate this
+into your project.</p>
+
+<h2>Install</h2>
+
+<p>Unzip the zip file included to your modules directory.  You can also build the
+app yourself if you want (but I've included the latest .zip in case you need
+it).</p>
+
+<p>Register your module with your application by editing <code>tiapp.xml</code> and adding
+your module.</p>
+
+<p>Example:</p>
+
+<pre><code>&lt;modules&gt;
+  &lt;module version="0.1"&gt;com.foodonthetable.regions&lt;/module&gt;
+&lt;/modules&gt;
+</code></pre>
+
+<p>When you run your project, the compiler will know automatically compile in your module
+dependencies and copy appropriate image assets into the application.</p>
+
+<h2>Using Regions in Code</h2>
+
+<p>I've tried to make this as simple as possible.</p>
+
+<pre><code>var regions = require('com.foodonthetable.regions');
+
+regions.addEventListener("didEnterRegion", function (event) {
+  Ti.API.info('didEnterRegion: ' + event.region.id + " (" + event.message + ")");
+});
+
+regions.startMonitoring({
+  id:'test',
+  radius:100.0,
+  lat:30.2796,
+  lng:-97.7595
+});
+</code></pre>
+
+<p>Check out <code>example/app.js</code> for a complete example of all available events.</p>
+
+<h2>Contact</h2>
+
+<p><a href="https://github.com/shad" class="user-mention">@shad</a> on GitHub
+@shadr on Twitter</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Regions maintained by <a href="https://github.com/shad">shad</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
